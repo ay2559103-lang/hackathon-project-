@@ -142,27 +142,26 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* AI Insights Section */}
-          <div className="insights-section glass-card">
+          {/* AI Listing Assistant Section */}
+          <div className="ai-listing-assistant glass-card">
             <div className="card-header">
               <h3 className="card-title flex items-center gap-2">
                 <Sparkles size={18} className="color-primary" />
-                AI Optimization
+                Create with AI
               </h3>
             </div>
-            <div className="insights-list">
-              {aiInsights.map((insight, i) => (
-                <div key={i} className="insight-card">
-                  <div className="insight-icon">{insight.icon}</div>
-                  <div className="insight-details">
-                    <h4 className="insight-title">{insight.title}</h4>
-                    <p className="insight-desc">{insight.description}</p>
-                    <button className="insight-btn">
-                      Apply Suggestion <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className="ai-assistant-body">
+              <p className="ai-prompt-text">Describe what you want to sell, and AI will create the premium listing for you.</p>
+              <div className="ai-input-group">
+                <textarea 
+                  className="ai-glow-input" 
+                  placeholder="e.g. A handmade wooden coffee table, walnut finish, mid-century modern style..."
+                  rows="3"
+                ></textarea>
+                <button className="btn btn-primary btn-lg btn-full ai-generate-btn">
+                  Generate Listing <Sparkles size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

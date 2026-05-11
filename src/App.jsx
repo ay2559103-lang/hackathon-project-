@@ -8,6 +8,8 @@ import DashboardPage from './pages/DashboardPage';
 import AIAssistantPage from './pages/AIAssistantPage';
 import AddProductPage from './pages/AddProductPage';
 import ProfilePage from './pages/ProfilePage';
+import LoginPage from './pages/LoginPage';
+import NearbySellersPage from './pages/NearbySellersPage';
 
 export default function App() {
   return (
@@ -15,12 +17,15 @@ export default function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/feed" element={<FeedPage />} />
+
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/ai-assistant" element={<AIAssistantPage />} />
           <Route path="/add-product" element={<AddProductPage />} />
+          <Route path="/nearby" element={<NearbySellersPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </Layout>

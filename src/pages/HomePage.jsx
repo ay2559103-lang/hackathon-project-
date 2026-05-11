@@ -87,7 +87,11 @@ export default function HomePage() {
               <NavLink to="/add-product" className="btn btn-outline btn-lg">
                 Sell Your Product <Plus size={20} />
               </NavLink>
+              <NavLink to="/login" className="btn btn-ghost btn-lg ml-4">
+                Login <ArrowRight size={20} />
+              </NavLink>
             </div>
+
             
             <div className="hero-trust">
               <div className="trust-avatars">

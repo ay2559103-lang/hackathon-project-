@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   MapPin, Search, Filter, Star, Heart, MessageCircle,
   Eye, Share2, ShoppingBag, Shield, Sparkles, SlidersHorizontal, ChevronDown,
-  ArrowUpRight, Clock, Users
+  ArrowUpRight, Clock, Users, Plus
 } from 'lucide-react';
 import { products, categories, sellers } from '../data/mockData';
 import './FeedPage.css';
@@ -178,6 +178,10 @@ export default function FeedPage() {
             </button>
           </div>
         )}
+
+        <NavLink to="/add-product" className="fab-create pulse-glow">
+          <Plus size={24} />
+        </NavLink>
       </div>
     </div>
   );

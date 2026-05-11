@@ -14,6 +14,7 @@ const navItems = [
   { path: '/chat', icon: MessageCircle, label: 'Chat' },
   { path: '/dashboard', icon: BarChart3, label: 'Dashboard' },
   { path: '/ai-assistant', icon: Sparkles, label: 'AI Assistant' },
+  { path: '/nearby', icon: Store, label: 'Nearby' },
 ];
 
 export default function Layout({ children }) {
@@ -22,6 +23,7 @@ export default function Layout({ children }) {
   const location = useLocation();
 
   const isHomePage = location.pathname === '/';
+  const isLoginPage = location.pathname === '/login';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,7 +36,9 @@ export default function Layout({ children }) {
   return (
     <div className="layout">
       {/* Premium Sticky Header */}
-      <header className={`header glass ${scrolled ? 'header-scrolled' : ''} ${isHomePage ? 'header-home' : ''}`}>
+      {!isLoginPage && (
+        <header className={`header glass ${scrolled ? 'header-scrolled' : ''} ${isHomePage ? 'header-home' : ''}`}>
+
         <div className="container header-inner">
           <div className="header-left">
             <NavLink to="/" className="header-logo">
@@ -68,11 +72,15 @@ export default function Layout({ children }) {
                 <Bell size={20} />
                 <span className="notification-dot"></span>
               </button>
+              <NavLink to="/login" className="btn btn-ghost btn-sm mr-2">
+                Login
+              </NavLink>
               <NavLink to="/add-product" className="btn btn-primary btn-sm btn-sell">
                 <Plus size={18} />
                 <span>Sell Now</span>
               </NavLink>
             </div>
+
             
             <button
               className="mobile-menu-btn"
@@ -84,9 +92,13 @@ export default function Layout({ children }) {
           </div>
         </div>
       </header>
+      )}
+
 
       {/* Mobile Navigation Menu */}
+      {!isLoginPage && (
       <div className={`mobile-menu glass ${mobileMenuOpen ? 'open' : ''}`}>
+
         <nav className="mobile-nav-inner">
           {navItems.map((item) => (
             <NavLink
@@ -114,14 +126,18 @@ export default function Layout({ children }) {
           </div>
         </nav>
       </div>
+      )}
 
       {/* Main Content Area */}
-      <main className={`main-content ${isHomePage ? 'main-content-home' : ''}`}>
+      <main className={`main-content ${(isHomePage || isLoginPage) ? 'main-content-home' : ''}`}>
+
         {children}
       </main>
 
       {/* Premium Footer */}
+      {!isLoginPage && (
       <footer className="main-footer">
+
         <div className="container">
           <div className="footer-grid">
             <div className="footer-brand">
@@ -174,6 +190,8 @@ export default function Layout({ children }) {
           </div>
         </div>
       </footer>
+      )}
     </div>
+
   );
 }
