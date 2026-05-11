@@ -376,3 +376,44 @@ input, textarea, select {
   }
 }
 
+/* ===== AUTH COMPONENTS ===== */
+.auth-input {
+  width: 100%;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem 1rem 1rem 1rem;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.auth-input:focus {
+  border-color: var(--color-primary);
+  background: rgba(30, 41, 59, 0.8);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.auth-input::placeholder {
+  color: #64748b;
+}
+
+.auth-input.pl-12 {
+  padding-left: 3rem;
+}
+
+.auth-input.pr-12 {
+  padding-right: 3rem;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}

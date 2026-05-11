@@ -1,26 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Home, ShoppingBag, MessageCircle, BarChart3, User,
   Search, Bell, Plus, Menu, X, MapPin, Sparkles,
-  Store, Settings, Heart, ChevronRight
+  Store, Settings, Heart, ChevronRight, Navigation, Package
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Layout.css';
 
-const navItems = [
+const allNavItems = [
   { path: '/', icon: Home, label: 'Home' },
   { path: '/feed', icon: MapPin, label: 'Local Feed' },
   { path: '/products', icon: ShoppingBag, label: 'Products' },
+  { path: '/orders', icon: Package, label: 'My Orders' },
   { path: '/chat', icon: MessageCircle, label: 'Chat' },
-  { path: '/dashboard', icon: BarChart3, label: 'Dashboard' },
-  { path: '/ai-assistant', icon: Sparkles, label: 'AI Assistant' },
+  { path: '/dashboard', icon: BarChart3, label: 'Dashboard', role: 'seller' },
+  { path: '/ai-assistant', icon: Sparkles, label: 'AI Assistant', role: 'seller' },
+  { path: '/delivery', icon: Navigation, label: 'Delivery Portal', role: 'delivery' },
   { path: '/nearby', icon: Store, label: 'Nearby' },
 ];
 
 export default function Layout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { profile } = useAuth();
   const location = useLocation();
+
+  const navItems = useMemo(() => {
+    return allNavItems.filter(item => {
+      if (!item.role) return true;
+      return profile?.role === item.role;
+    });
+  }, [profile]);
 
   const isHomePage = location.pathname === '/';
   const isLoginPage = location.pathname === '/login';
