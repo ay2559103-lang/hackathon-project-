@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { 
   TrendingUp, Users, ShoppingBag, DollarSign, 
   ArrowUpRight, ArrowDownRight, Download, Activity,
-  Package, MapPin, BarChart
+  Package, MapPin, BarChart, Search
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './AdminDashboardPage.css';
@@ -23,6 +23,9 @@ const RECENT_ACTIVITY = [
 
 export default function AdminDashboardPage() {
   const [timeRange, setTimeRange] = useState('7days');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredActivity = RECENT_ACTIVITY.filter(act => !searchTerm || act.text.toLowerCase().includes(searchTerm.toLowerCase()) || act.type.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="admin-dashboard">
@@ -31,7 +34,17 @@ export default function AdminDashboardPage() {
           <h1 className="admin-page-title">Platform Analytics</h1>
           <p className="admin-page-desc">Overview of your ecommerce platform performance.</p>
         </div>
-        <div className="header-actions">
+        <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <div className="expandable-search-container">
+            <Search size={16} className="expandable-search-icon" />
+            <input
+              type="text"
+              className="expandable-search-input"
+              placeholder="Search activity feed..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
           <select 
             value={timeRange} 
             onChange={(e) => setTimeRange(e.target.value)}
@@ -95,17 +108,21 @@ export default function AdminDashboardPage() {
             <button className="btn-text">View All</button>
           </div>
           <div className="activity-list">
-            {RECENT_ACTIVITY.map(act => (
-              <div key={act.id} className="activity-item">
-                <div className={`activity-icon-sm ${act.type}`}>
-                  <act.icon size={14} />
+            {filteredActivity.length === 0 ? (
+              <p style={{ padding: '1rem', color: '#94a3b8', textAlign: 'center' }}>No matching activity found</p>
+            ) : (
+              filteredActivity.map(act => (
+                <div key={act.id} className="activity-item">
+                  <div className={`activity-icon-sm ${act.type}`}>
+                    <act.icon size={14} />
+                  </div>
+                  <div className="activity-details">
+                    <p>{act.text}</p>
+                    <span>{act.time}</span>
+                  </div>
                 </div>
-                <div className="activity-details">
-                  <p>{act.text}</p>
-                  <span>{act.time}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

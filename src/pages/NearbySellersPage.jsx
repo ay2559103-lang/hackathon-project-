@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   Navigation, ChevronDown, MapPin, Clock,
   ShoppingBag, ShoppingCart, Star, Store, Shield, Heart,
-  Package, Sparkles
+  Package, Sparkles, Search
 } from 'lucide-react';
 import { products as allProducts, sellers } from '../data/mockData';
 import { useCart } from '../context/CartContext';
@@ -18,6 +18,7 @@ export default function NearbySellersPage() {
   const [location, setLocation] = useState(null);
   const [nearbyProducts, setNearbyProducts] = useState([]);
   const [likedProducts, setLikedProducts] = useState(new Set());
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     document.title = "Nearby Sellers | LocalMarket";
@@ -57,18 +58,30 @@ export default function NearbySellersPage() {
     });
   };
 
+  const filteredNearbyProducts = nearbyProducts.filter(p => !searchTerm || p.title?.toLowerCase().includes(searchTerm.toLowerCase()) || p.description?.toLowerCase().includes(searchTerm.toLowerCase()) || p.sellerName?.toLowerCase().includes(searchTerm.toLowerCase()));
+
   return (
     <div className="nearby-page">
       {/* Header with Location */}
       <div className="nearby-header glass">
         <div className="container">
-          <div className="search-section">
+          <div className="search-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
             <div className="location-picker">
               <button className="location-btn" onClick={handleUseLocation}>
                 <Navigation size={18} />
                 <span>{location ? 'Noida, Sector 62' : 'Detect My Location'}</span>
                 <ChevronDown size={14} />
               </button>
+            </div>
+            <div className="expandable-search-container">
+              <Search size={16} className="expandable-search-icon" />
+              <input
+                type="text"
+                className="expandable-search-input"
+                placeholder="Search nearby products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
           </div>
         </div>
@@ -109,7 +122,7 @@ export default function NearbySellersPage() {
               Products Near You
             </h2>
             <span className="nearby-count">
-              {nearbyProducts.length} items available
+              {filteredNearbyProducts.length} items available
             </span>
           </div>
 
@@ -125,8 +138,8 @@ export default function NearbySellersPage() {
                   </div>
                 </div>
               ))
-            ) : nearbyProducts.length > 0 ? (
-              nearbyProducts.map(product => (
+            ) : filteredNearbyProducts.length > 0 ? (
+              filteredNearbyProducts.map(product => (
                 <div key={product.id} className="nearby-product-card glass-card animate-fade-in-up">
                   <div className="npc-image-wrapper">
                     <NavLink to={`/product/${product.id}`}>

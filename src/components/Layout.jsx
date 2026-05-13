@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, ShoppingBag, MessageCircle, BarChart3, User,
   Bell, Plus, Menu, X, MapPin, Sparkles,
   Store, Settings, Heart, ChevronRight, Navigation, Package,
-  ShieldAlert
+  ShieldAlert, Search
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
@@ -12,7 +12,7 @@ import './Layout.css';
 
 const allNavItems = [
   { path: '/', icon: Home, label: 'Home' },
-  { path: '/products', icon: ShoppingBag, label: 'Products' },
+  { path: '/products', icon: ShoppingBag, label: 'Products', excludeRoles: ['delivery'] },
   { path: '/orders', icon: Package, label: 'My Orders' },
   { path: '/chat', icon: MessageCircle, label: 'Chat' },
 
@@ -24,8 +24,17 @@ const allNavItems = [
 export default function Layout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
   const { profile } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleProductSearchSubmit = (e) => {
+    e.preventDefault();
+    if (productSearch.trim()) {
+      navigate(`/products?search=${encodeURIComponent(productSearch.trim())}`);
+    }
+  };
 
   const navItems = useMemo(() => {
     return allNavItems.filter(item => {
@@ -81,7 +90,20 @@ export default function Layout({ children }) {
           </div>
 
           <div className="header-right">
-            <div className="header-actions">
+            <div className="header-actions" style={{ display: 'flex', alignItems: 'center' }}>
+              {/* Expandable search bar for searching products near notification icon - Hidden on Delivery Dashboard */}
+              {profile?.role !== 'delivery' && location.pathname !== '/delivery' && (
+                <form onSubmit={handleProductSearchSubmit} className="expandable-search-container" style={{ marginRight: '0.5rem' }}>
+                  <Search size={16} className="expandable-search-icon" onClick={() => { if(productSearch.trim()) navigate(`/products?search=${encodeURIComponent(productSearch.trim())}`); }} />
+                  <input
+                    type="text"
+                    className="expandable-search-input"
+                    placeholder="Search products..."
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                  />
+                </form>
+              )}
               <NotificationDropdown />
               
               {profile ? (

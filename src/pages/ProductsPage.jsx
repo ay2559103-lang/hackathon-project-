@@ -1,18 +1,32 @@
-import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   ShoppingBag, Plus, Filter, Edit3, Trash2,
   Eye, Heart, Star, MoreVertical, Grid, List,
-  Sparkles, TrendingUp, Package, Clock, ExternalLink
+  Sparkles, TrendingUp, Package, Clock, ExternalLink, Search
 } from 'lucide-react';
 import { products } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import './ProductsPage.css';
 
 export default function ProductsPage() {
+  const location = useLocation();
+  const initialSearch = new URLSearchParams(location.search).get('search') || '';
   const [viewMode, setViewMode] = useState('grid');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const querySearch = params.get('search');
+    if (querySearch !== null) {
+      setSearchTerm(querySearch);
+    }
+  }, [location.search]);
+
   const { profile } = useAuth();
   const isSeller = profile?.role === 'seller';
+
+  const filteredProducts = products.filter(p => !searchTerm || p.title?.toLowerCase().includes(searchTerm.toLowerCase()) || p.category?.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="products-page">
@@ -63,9 +77,19 @@ export default function ProductsPage() {
         {/* Management Toolbar */}
         <div className="products-toolbar glass">
           <div className="toolbar-info">
-            <span className="products-count">{products.length} Items found</span>
+            <span className="products-count">{filteredProducts.length} Items found</span>
           </div>
-          <div className="toolbar-actions">
+          <div className="toolbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <div className="expandable-search-container">
+              <Search size={16} className="expandable-search-icon" />
+              <input
+                type="text"
+                className="expandable-search-input"
+                placeholder="Search inventory..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             <div className="view-selector">
               <button 
                 className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -85,7 +109,7 @@ export default function ProductsPage() {
 
         {/* Products Display */}
         <div className={viewMode === 'grid' ? 'manage-grid stagger' : 'manage-list'}>
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             viewMode === 'grid' ? (
               <div key={product.id} className="manage-card glass-card animate-fade-in-up">
                 <div className="card-media">
@@ -174,7 +198,7 @@ export default function ProductsPage() {
           ))}
         </div>
 
-        {products.length === 0 && (
+        {filteredProducts.length === 0 && (
           <div className="empty-inventory glass">
             <ShoppingBag size={64} className="color-text-muted" />
             <h3>Your inventory is empty</h3>

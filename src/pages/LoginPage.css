@@ -97,10 +97,12 @@
   display: flex;
   background: rgba(0, 0, 0, 0.2);
   border-radius: var(--radius-lg);
-  padding: 0.25rem;
+  padding: 0.25rem 0; /* Remove horizontal padding so indicator 33.33% fits perfectly */
   margin-bottom: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
   position: relative;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .auth-roles-otp {
@@ -111,10 +113,11 @@
 }
 
 .auth-role-btn {
-  flex: 1;
-  padding: 0.75rem 0.5rem;
+  flex: 1 1 0%;
+  width: 33.33%;
+  padding: 0.6rem 0.2rem;
   border-radius: var(--radius-md);
-  font-size: 0.8125rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--color-text-secondary);
   background: transparent;
@@ -126,7 +129,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .auth-role-btn.active {
@@ -137,12 +141,14 @@
   position: absolute;
   top: 0.25rem;
   bottom: 0.25rem;
+  width: 33.33% !important; /* Force width to match left values */
   background: rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
 }
 
 /* Login Type Toggle */

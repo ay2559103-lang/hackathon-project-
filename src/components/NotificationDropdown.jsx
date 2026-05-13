@@ -1,13 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Bell, Package, MessageCircle, Info, CheckCircle, Navigation, X, Store } from 'lucide-react';
+import { Bell, Package, MessageCircle, Info, CheckCircle, Navigation, X, Store, Search } from 'lucide-react';
 import { useNotifications } from '../context/NotificationContext';
 import './NotificationDropdown.css';
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+
+  const filteredNotifications = notifications.filter(notif => 
+    !searchTerm || 
+    notif.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    notif.message?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -67,23 +74,39 @@ export default function NotificationDropdown() {
 
       {isOpen && (
         <div className="notification-dropdown glass-card animate-slide-down">
-          <div className="nd-header">
-            <h3>Notifications</h3>
-            {unreadCount > 0 && (
-              <button className="nd-mark-all" onClick={markAllAsRead}>
-                <CheckCircle size={14} /> Mark all read
-              </button>
-            )}
+          <div className="nd-header" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <h3>Notifications</h3>
+              {unreadCount > 0 && (
+                <button className="nd-mark-all" onClick={markAllAsRead}>
+                  <CheckCircle size={14} /> Mark all read
+                </button>
+              )}
+            </div>
+            <div 
+              className="expandable-search-container" 
+              style={{ maxWidth: '100%', marginTop: '0.25rem' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Search size={14} className="expandable-search-icon" />
+              <input
+                type="text"
+                className="expandable-search-input"
+                placeholder="Search notifications..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
           
           <div className="nd-body custom-scrollbar">
-            {notifications.length === 0 ? (
+            {filteredNotifications.length === 0 ? (
               <div className="nd-empty">
                 <Bell size={32} className="opacity-30 mb-2" />
-                <p>No notifications yet</p>
+                <p>{searchTerm ? 'No matching notifications' : 'No notifications yet'}</p>
               </div>
             ) : (
-              notifications.map((notif) => (
+              filteredNotifications.map((notif) => (
                 <div 
                   key={notif.id} 
                   className={`nd-item ${!notif.is_read ? 'unread' : ''}`}

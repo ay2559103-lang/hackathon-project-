@@ -1,7 +1,7 @@
 import {
   BarChart3, TrendingUp, TrendingDown, Eye, MousePointerClick,
   ShoppingCart, IndianRupee, ArrowUpRight, Sparkles, Zap,
-  Clock, Target, ChevronRight, Activity, Plus, Box
+  Clock, Target, ChevronRight, Activity, Plus, Box, Search
 } from 'lucide-react';
 import { dashboardStats, aiInsights, weeklyViewsData, products as mockProducts } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSeeding, setIsSeeding] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -83,10 +84,20 @@ export default function DashboardPage() {
               <Activity size={14} />
               <span>Real-time Analytics</span>
             </div>
-            <h1 className="dashboard-title">Seller <span className="gradient-text">Overview</span></h1>
+            <h1 className="dashboard-title">The Future of <span className="gradient-text">Local Seller</span> is <span className="gradient-text">Here</span></h1>
             <p className="dashboard-subtitle">Track your growth and optimize with AI-driven insights.</p>
           </div>
-          <div className="dashboard-controls glass">
+          <div className="dashboard-controls glass" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div className="expandable-search-container">
+              <Search size={16} className="expandable-search-icon" />
+              <input
+                type="text"
+                className="expandable-search-input"
+                placeholder="Search listings..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             <button className="btn btn-primary btn-sm mr-2" onClick={() => navigate('/add-product')}>
               <Plus size={16} /> List New Product
             </button>
@@ -256,7 +267,9 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {(products.length > 0 ? products : mockProducts.filter(p => p.sellerId === 1)).slice(0, 5).map((product, i) => (
+                {(products.length > 0 ? products : mockProducts.filter(p => p.sellerId === 1))
+                  .filter(p => !searchTerm || p.title?.toLowerCase().includes(searchTerm.toLowerCase()) || p.category?.toLowerCase().includes(searchTerm.toLowerCase()) || p.category_name?.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .slice(0, 5).map((product, i) => (
                   <tr key={i}>
                     <td><span className="rank-badge">#{i + 1}</span></td>
                     <td>

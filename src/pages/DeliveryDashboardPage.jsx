@@ -26,9 +26,44 @@ import {
   Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { io } from 'socket.io-client';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import './DeliveryDashboardPage.css';
 import { toast } from 'react-hot-toast';
 import { deliveryService, FALLBACK_DELIVERIES } from '../services/deliveryService';
+
+// Fix Leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+const deliveryIcon = L.divIcon({
+  className: 'custom-delivery-icon',
+  html: '<div class="marker-pin delivery"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+const customerIcon = L.divIcon({
+  className: 'custom-customer-icon',
+  html: '<div class="marker-pin customer"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+// Helper component to update map view
+function MapUpdater({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, 14);
+  }, [center, map]);
+  return null;
+}
 
 // Mock data for delivery dashboard
 const deliveryStats = {
@@ -115,6 +150,9 @@ export default function DeliveryDashboardPage() {
   const [deliveriesError, setDeliveriesError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [locationLabel, setLocationLabel] = useState('Detect My Location');
+  const [customerLocation, setCustomerLocation] = useState({ lat: 28.62, lng: 77.22 });
+  const [routePath, setRoutePath] = useState([]);
+  const [socket, setSocket] = useState(null);
 
   const fetchNearbyDeliveries = useCallback(async () => {
     setDeliveriesLoading(true);
@@ -172,19 +210,72 @@ export default function DeliveryDashboardPage() {
     }
   }, [isOnline, activeTab, fetchNearbyDeliveries, availableRides.length]);
 
+  // Socket.io Real-time Tracking Initialization
+  useEffect(() => {
+    const newSocket = io('http://localhost:5000');
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      console.log('Connected to tracking server');
+      // In a real app, we'd join a specific order's room
+      newSocket.emit('join-delivery', 'demo-delivery-123');
+    });
+
+    newSocket.on('location-updated', ({ location, role }) => {
+      if (role === 'customer') {
+        setCustomerLocation(location);
+        toast.success('Customer location updated live');
+      }
+    });
+
+    return () => newSocket.close();
+  }, []);
+
+  // Fetch route from OSRM to align with navigation ways
+  useEffect(() => {
+    const fetchRoute = async () => {
+      try {
+        const response = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${location.lng},${location.lat};${customerLocation.lng},${customerLocation.lat}?overview=full&geometries=geojson`
+        );
+        const data = await response.json();
+        if (data.routes && data.routes[0]) {
+          const coordinates = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+          setRoutePath(coordinates);
+        }
+      } catch (error) {
+        console.error('Routing error:', error);
+        // Fallback to straight line
+        setRoutePath([[location.lat, location.lng], [customerLocation.lat, customerLocation.lng]]);
+      }
+    };
+
+    fetchRoute();
+  }, [location.lat, location.lng, customerLocation.lat, customerLocation.lng]);
+
   // Simulate real-time location updates
   useEffect(() => {
     let interval;
     if (isOnline) {
       interval = setInterval(() => {
-        setLocation(prev => ({
-          lat: prev.lat + (Math.random() - 0.5) * 0.001,
-          lng: prev.lng + (Math.random() - 0.5) * 0.001
-        }));
+        const newLoc = {
+          lat: location.lat + (Math.random() - 0.5) * 0.001,
+          lng: location.lng + (Math.random() - 0.5) * 0.001
+        };
+        setLocation(newLoc);
+
+        // Emit our location as delivery partner
+        if (socket) {
+          socket.emit('update-location', { 
+            deliveryId: 'demo-delivery-123', 
+            location: newLoc, 
+            role: 'delivery' 
+          });
+        }
       }, 5000);
     }
     return () => clearInterval(interval);
-  }, [isOnline]);
+  }, [isOnline, location.lat, location.lng, socket]);
 
   const toggleOnline = () => {
     setLoading(true);
@@ -243,7 +334,7 @@ export default function DeliveryDashboardPage() {
               <Activity size={14} />
               <span>Partner Portal</span>
             </div>
-            <h1 className="dashboard-title">Delivery <span className="gradient-text">Partner</span></h1>
+            <h1 className="dashboard-title">The Future of <span className="gradient-text">Local Seller</span> is <span className="gradient-text">Here</span></h1>
             <p className="dashboard-subtitle">Manage your deliveries and track earnings in real-time.</p>
           </div>
           
@@ -602,28 +693,42 @@ export default function DeliveryDashboardPage() {
               <h3 className="card-title">Live Tracking</h3>
               <div className={`live-dot-pulse ${isOnline ? 'active' : ''}`}></div>
             </div>
-            <div className="map-placeholder">
-              <div className="map-overlay">
-                <motion.div 
-                  className="map-partner-dot"
-                  animate={{ 
-                    x: (location.lng - 77.2090) * 10000,
-                    y: (location.lat - 28.6139) * 10000 
-                  }}
-                >
-                  <div className="dot-inner"></div>
-                  <div className="dot-pulse"></div>
-                </motion.div>
-                <div className="map-destination-pin">
-                  <MapPin size={24} fill="var(--color-primary)" />
-                </div>
-              </div>
-              <div className="map-controls">
-                <button className="map-btn"><Navigation size={18} /></button>
-              </div>
-              <p className="map-hint text-center p-4">
-                Location: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-              </p>
+            <div className="map-placeholder real-map">
+              <MapContainer 
+                center={[location.lat, location.lng]} 
+                zoom={14} 
+                scrollWheelZoom={false}
+                attributionControl={false}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                />
+                <MapUpdater center={[location.lat, location.lng]} />
+                
+                <Marker position={[location.lat, location.lng]} icon={deliveryIcon}>
+                  <Popup>
+                    <strong>You</strong> (Delivery Partner)<br />
+                    Updating live...
+                  </Popup>
+                </Marker>
+
+                <Marker position={[customerLocation.lat, customerLocation.lng]} icon={customerIcon}>
+                  <Popup>
+                    <strong>Customer</strong><br />
+                    Awaiting delivery
+                  </Popup>
+                </Marker>
+
+                <Polyline 
+                  positions={routePath.length > 0 ? routePath : [[location.lat, location.lng], [customerLocation.lat, customerLocation.lng]]}
+                  color="#A855F7"
+                  weight={5}
+                  opacity={0.8}
+                  lineJoin="round"
+                />
+              </MapContainer>
             </div>
             <div className="sidebar-info-card glass">
               <div className="info-header">Current Status</div>

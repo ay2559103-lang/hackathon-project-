@@ -58,9 +58,10 @@ const featuredCategories = [
 ];
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const isSeller = user?.user_metadata?.role === 'seller';
+  const isSeller = (profile?.role || user?.user_metadata?.role) === 'seller';
+  const isDelivery = (profile?.role || user?.user_metadata?.role) === 'delivery';
 
   return (
     <div className="home-page">
@@ -73,13 +74,9 @@ export default function HomePage() {
         
         <div className="container hero-container">
           <div className="hero-content animate-fade-in">
-            <div className="hero-badge">
-              <Sparkles size={14} className="icon-pulse" />
-              <span>Premium Hyperlocal Marketplace</span>
-            </div>
             <h1 className="hero-title">
-              The Future of <span className="gradient-text">Local</span><br />
-              Commerce is <span className="gradient-text">Here</span>.
+              The Future of <span className="gradient-text">Local Seller</span><br />
+              is <span className="gradient-text">Here</span>.
             </h1>
             <p className="hero-subtitle">
               Connect with 500+ local sellers using AI-powered listing tools 
@@ -166,7 +163,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Categories */}
-      {!isSeller && (
+      {!isSeller && !isDelivery && (
         <section className="categories-section">
           <div className="container">
             <div className="section-header text-center">
@@ -188,73 +185,75 @@ export default function HomePage() {
       )}
 
       {/* Featured Products Section */}
-      <section className="products-section">
-        <div className="container">
-          <div className="section-header-row">
-            <div>
-              <h2 className="section-title">Featured <span className="gradient-text">Listings</span></h2>
-              <p className="section-subtitle">Premium picks from our top-rated local sellers.</p>
-            </div>
-            <NavLink to="/products" className="btn btn-ghost">
-              View All <ArrowRight size={18} />
-            </NavLink>
-          </div>
-          
-          <div className="products-grid stagger">
-            {products.slice(0, 8).map((product) => (
-              <div key={product.id} className="product-card-premium glass-card animate-fade-in-up">
-                <div className="product-image-box">
-                  <img src={product.image} alt={product.title} className="product-img" />
-                  <div className="product-badges">
-                    <span className="badge-price">₹{product.price}</span>
-                    <span className="badge-category">{product.category}</span>
-                  </div>
-                  <button className="favorite-btn" aria-label="Add to favorites">
-                    <Heart size={18} />
-                  </button>
-                  {product.aiGenerated && (
-                    <div className="ai-status">
-                      <Sparkles size={10} /> AI Optimized
-                    </div>
-                  )}
-                </div>
-                <div className="product-details">
-                  <div className="seller-info-row">
-                    <div className="seller-avatar-sm" style={{ background: product.sellerColor || 'var(--color-primary)' }}>
-                      {product.sellerInitials}
-                    </div>
-                    <span className="seller-name">{product.sellerName}</span>
-                    <div className="product-rating-sm">
-                      <Star size={12} fill="var(--color-warning)" stroke="var(--color-warning)" />
-                      <span>{product.rating}</span>
-                    </div>
-                  </div>
-                  <h3 className="product-title-premium">{product.title}</h3>
-                  <p className="product-desc-preview">{product.description.substring(0, 60)}...</p>
-                  
-                  <div className="product-actions-row">
-                    <div className="product-location">
-                      <MapPin size={12} />
-                      <span>{product.distance}</span>
-                    </div>
-                    <div className="product-btn-group">
-                      <NavLink to={`/product/${product.id}`} className="btn-chat-icon" title="View Details">
-                        <Info size={18} />
-                      </NavLink>
-                      <button 
-                        className="btn-buy-now" 
-                        onClick={() => navigate('/checkout', { state: { product: { ...product, quantity: 1 } } })}
-                      >
-                        Buy Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
+      {!isDelivery && (
+        <section className="products-section">
+          <div className="container">
+            <div className="section-header-row">
+              <div>
+                <h2 className="section-title">Featured <span className="gradient-text">Listings</span></h2>
+                <p className="section-subtitle">Premium picks from our top-rated local sellers.</p>
               </div>
-            ))}
+              <NavLink to="/products" className="btn btn-ghost">
+                View All <ArrowRight size={18} />
+              </NavLink>
+            </div>
+            
+            <div className="products-grid stagger">
+              {products.slice(0, 8).map((product) => (
+                <div key={product.id} className="product-card-premium glass-card animate-fade-in-up">
+                  <div className="product-image-box">
+                    <img src={product.image} alt={product.title} className="product-img" />
+                    <div className="product-badges">
+                      <span className="badge-price">₹{product.price}</span>
+                      <span className="badge-category">{product.category}</span>
+                    </div>
+                    <button className="favorite-btn" aria-label="Add to favorites">
+                      <Heart size={18} />
+                    </button>
+                    {product.aiGenerated && (
+                      <div className="ai-status">
+                        <Sparkles size={10} /> AI Optimized
+                      </div>
+                    )}
+                  </div>
+                  <div className="product-details">
+                    <div className="seller-info-row">
+                      <div className="seller-avatar-sm" style={{ background: product.sellerColor || 'var(--color-primary)' }}>
+                        {product.sellerInitials}
+                      </div>
+                      <span className="seller-name">{product.sellerName}</span>
+                      <div className="product-rating-sm">
+                        <Star size={12} fill="var(--color-warning)" stroke="var(--color-warning)" />
+                        <span>{product.rating}</span>
+                      </div>
+                    </div>
+                    <h3 className="product-title-premium">{product.title}</h3>
+                    <p className="product-desc-preview">{product.description.substring(0, 60)}...</p>
+                    
+                    <div className="product-actions-row">
+                      <div className="product-location">
+                        <MapPin size={12} />
+                        <span>{product.distance}</span>
+                      </div>
+                      <div className="product-btn-group">
+                        <NavLink to={`/product/${product.id}`} className="btn-chat-icon" title="View Details">
+                          <Info size={18} />
+                        </NavLink>
+                        <button 
+                          className="btn-buy-now" 
+                          onClick={() => navigate('/checkout', { state: { product: { ...product, quantity: 1 } } })}
+                        >
+                          Buy Now
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* How It Works Section */}
       <section className="how-it-works-section">

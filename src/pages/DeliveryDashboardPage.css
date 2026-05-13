@@ -251,53 +251,53 @@
   gap: var(--space-xl);
 }
 
-.map-placeholder {
-  width: 100%;
-  height: 300px;
+.map-placeholder.real-map {
   background: #0f172a;
   border-radius: var(--radius-lg);
-  position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  height: 350px;
 }
 
-.map-partner-dot {
+.marker-pin {
+  width: 20px;
+  height: 20px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  margin: -10px 0 0 -10px;
 }
 
-.dot-inner {
-  width: 12px;
-  height: 12px;
+.marker-pin.delivery {
   background: var(--color-primary);
+  box-shadow: 0 0 15px var(--color-primary);
+}
+
+.marker-pin.customer {
+  background: #F43F5E;
+  box-shadow: 0 0 15px #F43F5E;
+}
+
+.marker-pin::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #0f172a;
   border-radius: 50%;
-  border: 2px solid white;
 }
 
-.dot-pulse {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-  opacity: 0.5;
+.leaflet-container {
+  background: #0f172a !important;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(3); opacity: 0; }
-}
-
-.map-destination-pin {
-  position: absolute;
-  top: 30%;
-  right: 20%;
-  color: #10b981;
+.leaflet-control-attribution {
+  background: rgba(15, 23, 42, 0.7) !important;
+  color: #64748b !important;
 }
 
 .sidebar-info-card {
