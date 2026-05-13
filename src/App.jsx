@@ -13,7 +13,12 @@ import NearbySellersPage from './pages/NearbySellersPage';
 import DeliveryDashboardPage from './pages/DeliveryDashboardPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import AIChatbot from './components/AIChatbot';
+import FloatingCartButton from './components/FloatingCartButton';
 
 // Admin Imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -52,8 +57,10 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/feed" element={<FeedPage />} />
                 <Route path="/nearby" element={<NearbySellersPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
 
                 {/* Protected Customer/Seller Routes */}
                 <Route path="/products" element={<ProductsPage />} />
@@ -100,14 +107,6 @@ export default function App() {
                   } 
                 />
                 <Route 
-                  path="/ai-assistant" 
-                  element={
-                    <ProtectedRoute allowedRoles={['seller']}>
-                      <AIAssistantPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
                   path="/add-product" 
                   element={
                     <ProtectedRoute allowedRoles={['seller']}>
@@ -115,8 +114,14 @@ export default function App() {
                     </ProtectedRoute>
                   } 
                 />
-
-                {/* Delivery Partner Routes */}
+                <Route 
+                  path="/ai-assistant" 
+                  element={
+                    <ProtectedRoute allowedRoles={['seller']}>
+                      <AIAssistantPage />
+                    </ProtectedRoute>
+                  } 
+                />                {/* Delivery Partner Routes */}
                 <Route 
                   path="/delivery" 
                   element={
@@ -130,6 +135,8 @@ export default function App() {
           }
         />
       </Routes>
+      <AIChatbot />
+      <FloatingCartButton />
     </BrowserRouter>
   );
 }

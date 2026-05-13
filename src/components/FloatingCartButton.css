@@ -1,0 +1,149 @@
+.floating-cart-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.floating-cart-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary-color, #3b82f6);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+  position: relative;
+  overflow: visible;
+}
+
+.floating-cart-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+}
+
+.floating-cart-btn:active {
+  transform: scale(0.92);
+}
+
+.floating-cart-btn .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Animations */
+.cart-entrance {
+  animation: slideInFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cart-exit {
+  animation: slideOutFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideOutFade {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+  }
+}
+
+/* Pulse Animation when items added */
+.pulse-anim {
+  animation: cartPulse 0.6s ease-in-out;
+}
+
+@keyframes cartPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Tooltip */
+.cart-tooltip {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  background: #1e293b;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.floating-cart-btn:hover .cart-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .floating-cart-container {
+    bottom: 84px; /* Higher for bottom nav bar if exists */
+    right: 16px;
+  }
+  
+  .floating-cart-btn {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+/* Theme Integration Fallbacks */
+:root {
+  --primary-color: #3b82f6;
+}
+
+[data-theme='dark'] .floating-cart-btn {
+  background: var(--primary-color, #60a5fa);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .floating-cart-btn .badge {
+  border-color: #1e293b;
+}

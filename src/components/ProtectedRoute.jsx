@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (allowedRoles.length > 0 && profile && !allowedRoles.includes(profile.role)) {
     // Redirect to their appropriate dashboard if they try to access a role-restricted route
-    const redirectPath = profile.role === 'seller' ? '/dashboard' : profile.role === 'delivery' ? '/delivery' : '/feed';
+  const redirectPath = profile.role === 'delivery' ? '/delivery' : '/feed';
     return <Navigate to={redirectPath} replace />;
   }
 

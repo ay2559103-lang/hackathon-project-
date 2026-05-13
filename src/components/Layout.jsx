@@ -2,22 +2,23 @@ import { useState, useEffect, useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Home, ShoppingBag, MessageCircle, BarChart3, User,
-  Search, Bell, Plus, Menu, X, MapPin, Sparkles,
-  Store, Settings, Heart, ChevronRight, Navigation, Package
+  Bell, Plus, Menu, X, MapPin, Sparkles,
+  Store, Settings, Heart, ChevronRight, Navigation, Package,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import NotificationDropdown from './NotificationDropdown';
 import './Layout.css';
 
 const allNavItems = [
   { path: '/', icon: Home, label: 'Home' },
-  { path: '/feed', icon: MapPin, label: 'Local Feed' },
   { path: '/products', icon: ShoppingBag, label: 'Products' },
   { path: '/orders', icon: Package, label: 'My Orders' },
   { path: '/chat', icon: MessageCircle, label: 'Chat' },
-  { path: '/dashboard', icon: BarChart3, label: 'Dashboard', role: 'seller' },
-  { path: '/ai-assistant', icon: Sparkles, label: 'AI Assistant', role: 'seller' },
+
   { path: '/delivery', icon: Navigation, label: 'Delivery Portal', role: 'delivery' },
-  { path: '/nearby', icon: Store, label: 'Nearby' },
+  { path: '/nearby', icon: Store, label: 'Nearby', excludeRoles: ['delivery'] },
+  { path: '/admin', icon: ShieldAlert, label: 'Admin', role: 'admin' },
 ];
 
 export default function Layout({ children }) {
@@ -28,8 +29,13 @@ export default function Layout({ children }) {
 
   const navItems = useMemo(() => {
     return allNavItems.filter(item => {
-      if (!item.role) return true;
-      return profile?.role === item.role;
+      // If item is role-specific
+      if (item.role && profile?.role !== item.role) return false;
+      
+      // If item should be excluded for certain roles
+      if (item.excludeRoles && profile?.role && item.excludeRoles.includes(profile.role)) return false;
+      
+      return true;
     });
   }, [profile]);
 
@@ -76,20 +82,30 @@ export default function Layout({ children }) {
 
           <div className="header-right">
             <div className="header-actions">
-              <button className="header-icon-btn" aria-label="Search">
-                <Search size={20} />
-              </button>
-              <button className="header-icon-btn" aria-label="Notifications">
-                <Bell size={20} />
-                <span className="notification-dot"></span>
-              </button>
-              <NavLink to="/login" className="btn btn-ghost btn-sm mr-2">
-                Login
-              </NavLink>
-              <NavLink to="/add-product" className="btn btn-primary btn-sm btn-sell">
-                <Plus size={18} />
-                <span>Sell Now</span>
-              </NavLink>
+              <NotificationDropdown />
+              
+              {profile ? (
+                <>
+                  {profile?.role === 'seller' && (
+                    <NavLink to="/add-product" className="btn btn-primary btn-sm mr-3 hide-mobile">
+                      <Plus size={16} /> Sell
+                    </NavLink>
+                  )}
+                  <NavLink to="/profile" className="header-profile-link" title="My Profile">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="Profile" className="header-avatar" />
+                    ) : (
+                      <div className="header-profile-icon glass">
+                        <User size={20} />
+                      </div>
+                    )}
+                  </NavLink>
+                </>
+              ) : (
+                <NavLink to="/login" className="btn btn-ghost btn-sm mr-2">
+                  Login
+                </NavLink>
+              )}
             </div>
 
             
@@ -125,15 +141,47 @@ export default function Layout({ children }) {
               <ChevronRight size={18} />
             </NavLink>
           ))}
-          <div className="mobile-menu-footer">
+          {profile?.role === 'seller' && (
             <NavLink
               to="/add-product"
-              className="btn btn-primary btn-full"
+              className="mobile-nav-link sell-link-mobile"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <Plus size={20} />
-              Start Selling
+              <div className="mobile-link-content">
+                <Plus size={20} className="color-primary" />
+                <span className="color-primary">Start Selling</span>
+              </div>
+              <ChevronRight size={18} />
             </NavLink>
+          )}
+          <div className="mobile-menu-footer">
+            {profile ? (
+              <NavLink
+                to="/profile"
+                className="mobile-nav-link profile-link-mobile"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="mobile-link-content">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="Profile" className="avatar-sm-mobile" />
+                  ) : (
+                    <User size={20} />
+                  )}
+                  <span>My Profile</span>
+                </div>
+                <ChevronRight size={18} />
+              </NavLink>
+            ) : (
+              <NavLink
+                to="/login"
+                className="btn btn-outline btn-full mb-3"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Login to Account
+              </NavLink>
+            )}
+            
+
           </div>
         </nav>
       </div>
@@ -171,20 +219,12 @@ export default function Layout({ children }) {
             <div className="footer-nav-group">
               <h4>Platform</h4>
               <nav>
-                <NavLink to="/feed">Local Feed</NavLink>
                 <NavLink to="/products">Browse Products</NavLink>
                 <NavLink to="/ai-assistant">AI Assistant</NavLink>
               </nav>
             </div>
             
-            <div className="footer-nav-group">
-              <h4>For Sellers</h4>
-              <nav>
-                <NavLink to="/dashboard">Seller Dashboard</NavLink>
-                <NavLink to="/add-product">Sell Product</NavLink>
-                <NavLink to="/profile">My Profile</NavLink>
-              </nav>
-            </div>
+
             
             <div className="footer-nav-group">
               <h4>Support</h4>

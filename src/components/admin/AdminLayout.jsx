@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, ShoppingBag, Package, 
-  Truck, FileText, Settings, LogOut, Search, 
+  Truck, FileText, Settings, LogOut, 
   Bell, Menu, X, ShieldAlert, BarChart, ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -11,7 +11,7 @@ import './AdminLayout.css';
 const adminNavItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Analytics Overview' },
   { path: '/admin/users', icon: Users, label: 'User Management' },
-  { path: '/admin/products', icon: ShoppingBag, label: 'Product Approvals' },
+  { path: '/admin/products', icon: ShoppingBag, label: 'Product Management' },
   { path: '/admin/orders', icon: Package, label: 'Order & Refunds' },
   { path: '/admin/delivery', icon: Truck, label: 'Delivery Network' },
   { path: '/admin/reports', icon: FileText, label: 'Export Reports' },
@@ -87,10 +87,7 @@ export default function AdminLayout({ children }) {
       <div className="admin-main">
         {/* Top Header */}
         <header className="admin-topbar glass">
-          <div className="admin-search">
-            <Search size={18} />
-            <input type="text" placeholder="Search orders, users, products..." />
-          </div>
+
           <div className="admin-topbar-actions">
             <button className="admin-icon-btn">
               <Bell size={20} />

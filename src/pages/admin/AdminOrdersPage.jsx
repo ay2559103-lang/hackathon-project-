@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { 
-  Search, Eye, RefreshCw, Truck, RotateCcw, ShieldAlert
+  Eye, RefreshCw, Truck, RotateCcw, ShieldAlert
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './AdminUsersPage.css'; // Reusing table styles
@@ -14,12 +14,12 @@ const MOCK_ORDERS = [
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+
 
   const filteredOrders = MOCK_ORDERS.filter(o => {
     if (activeTab === 'refunds' && o.status !== 'refund_requested') return false;
     if (activeTab === 'active' && !['processing', 'shipped'].includes(o.status)) return false;
-    if (searchQuery && !o.id.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+
     return true;
   });
 
@@ -41,15 +41,7 @@ export default function AdminOrdersPage() {
           </div>
 
           <div className="toolbar-actions">
-            <div className="admin-search-sm">
-              <Search size={16} />
-              <input 
-                type="text" 
-                placeholder="Search by Order ID..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+
           </div>
         </div>
 

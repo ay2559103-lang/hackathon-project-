@@ -1,20 +1,18 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  ShoppingBag, Plus, Search, Filter, Edit3, Trash2,
+  ShoppingBag, Plus, Filter, Edit3, Trash2,
   Eye, Heart, Star, MoreVertical, Grid, List,
   Sparkles, TrendingUp, Package, Clock, ExternalLink
 } from 'lucide-react';
 import { products } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 import './ProductsPage.css';
 
 export default function ProductsPage() {
   const [viewMode, setViewMode] = useState('grid');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredProducts = products.filter(p =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const { profile } = useAuth();
+  const isSeller = profile?.role === 'seller';
 
   return (
     <div className="products-page">
@@ -22,11 +20,13 @@ export default function ProductsPage() {
         <div className="products-header">
           <div>
             <h1 className="products-title">Inventory <span className="gradient-text">Management</span></h1>
-            <p className="products-subtitle">Control your listings and track performance.</p>
+            <p className="products-subtitle">{isSeller ? 'Control your listings and track performance.' : 'Browse our high-quality inventory.'}</p>
           </div>
-          <NavLink to="/add-product" className="btn btn-primary">
-            <Plus size={18} /> New Product
-          </NavLink>
+          {isSeller && (
+            <NavLink to="/add-product" className="btn btn-primary">
+              <Plus size={18} /> New Product
+            </NavLink>
+          )}
         </div>
 
         {/* Premium Stats Row */}
@@ -62,14 +62,8 @@ export default function ProductsPage() {
 
         {/* Management Toolbar */}
         <div className="products-toolbar glass">
-          <div className="toolbar-search">
-            <Search size={20} className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search in your inventory..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="toolbar-info">
+            <span className="products-count">{products.length} Items found</span>
           </div>
           <div className="toolbar-actions">
             <div className="view-selector">
@@ -91,7 +85,7 @@ export default function ProductsPage() {
 
         {/* Products Display */}
         <div className={viewMode === 'grid' ? 'manage-grid stagger' : 'manage-list'}>
-          {filteredProducts.map((product) => (
+          {products.map((product) => (
             viewMode === 'grid' ? (
               <div key={product.id} className="manage-card glass-card animate-fade-in-up">
                 <div className="card-media">
@@ -101,10 +95,12 @@ export default function ProductsPage() {
                       <Sparkles size={10} /> AI Enhanced
                     </div>
                   )}
-                  <div className="media-overlay">
-                    <button className="btn-icon-blur"><Edit3 size={16} /></button>
-                    <button className="btn-icon-blur danger"><Trash2 size={16} /></button>
-                  </div>
+                  {isSeller && (
+                    <div className="media-overlay">
+                      <button className="btn-icon-blur"><Edit3 size={16} /></button>
+                      <button className="btn-icon-blur danger"><Trash2 size={16} /></button>
+                    </div>
+                  )}
                 </div>
                 <div className="card-info-premium">
                   <div className="card-info-header">
@@ -133,15 +129,15 @@ export default function ProductsPage() {
                     </div>
                   </div>
                   <div className="card-footer-actions">
-                    <button className="btn btn-outline btn-sm btn-full">
+                    <NavLink to={`/product/${product.id}`} className="btn btn-outline btn-sm btn-full">
                       <ExternalLink size={14} /> View Details
-                    </button>
+                    </NavLink>
                   </div>
                 </div>
               </div>
             ) : (
               <div key={product.id} className="manage-list-item glass-card animate-fade-in-up">
-                <div className="list-product-box">
+                <NavLink to={`/product/${product.id}`} className="list-product-box">
                   <div className="list-thumb-container">
                     <img src={product.image} alt={product.title} className="list-thumb-img" />
                   </div>
@@ -153,7 +149,7 @@ export default function ProductsPage() {
                       <span className="list-date">Added 2 days ago</span>
                     </div>
                   </div>
-                </div>
+                </NavLink>
                 <div className="list-price-box">
                   <span className="list-price-label">Price</span>
                   <span className="list-price-value">₹{product.price}</span>
@@ -163,15 +159,22 @@ export default function ProductsPage() {
                   <div className="list-stat"><Heart size={16} /> {product.likes}</div>
                 </div>
                 <div className="list-actions-box">
-                  <button className="btn-icon-md glass"><Edit3 size={18} /></button>
-                  <button className="btn-icon-md glass danger"><Trash2 size={18} /></button>
+                  <NavLink to={`/product/${product.id}`} className="btn-icon-md glass" title="View Details">
+                    <Eye size={18} />
+                  </NavLink>
+                  {isSeller && (
+                    <>
+                      <button className="btn-icon-md glass"><Edit3 size={18} /></button>
+                      <button className="btn-icon-md glass danger"><Trash2 size={18} /></button>
+                    </>
+                  )}
                 </div>
               </div>
             )
           ))}
         </div>
 
-        {filteredProducts.length === 0 && (
+        {products.length === 0 && (
           <div className="empty-inventory glass">
             <ShoppingBag size={64} className="color-text-muted" />
             <h3>Your inventory is empty</h3>

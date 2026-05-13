@@ -1,17 +1,81 @@
 import {
   BarChart3, TrendingUp, TrendingDown, Eye, MousePointerClick,
   ShoppingCart, IndianRupee, ArrowUpRight, Sparkles, Zap,
-  Clock, Target, ChevronRight, Activity
+  Clock, Target, ChevronRight, Activity, Plus, Box
 } from 'lucide-react';
-import { dashboardStats, aiInsights, weeklyViewsData, products } from '../data/mockData';
+import { dashboardStats, aiInsights, weeklyViewsData, products as mockProducts } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
+import { seedSellerProducts } from '../services/seedingService';
+import { toast } from 'react-hot-toast';
+import { useState, useEffect } from 'react';
+import { supabase } from '../utils/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+
+  useEffect(() => {
+    fetchProducts();
+  }, [user]);
+
+  const fetchProducts = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('seller_id', user.id);
+
+    if (data) setProducts(data);
+    setIsLoading(false);
+  };
+
+  const handleSeed = async () => {
+    setIsSeeding(true);
+    const result = await seedSellerProducts(user);
+    if (result.success) {
+      toast.success(`Successfully added ${result.count} sample products!`);
+      fetchProducts();
+    } else {
+      toast.error(result.error);
+    }
+    setIsSeeding(false);
+  };
+
   const maxViews = Math.max(...weeklyViewsData.map(d => d.views));
 
   return (
     <div className="dashboard-page">
       <div className="container">
+        {/* Empty State / Seeding Banner */}
+        {products.length === 0 && !isLoading && (
+          <div className="seeding-banner glass animate-slide-in">
+            <div className="seeding-content">
+              <div className="seeding-icon">
+                <Box size={32} className="color-primary" />
+              </div>
+              <div className="seeding-text">
+                <h3>Your shop is empty!</h3>
+                <p>Want to see how your dashboard looks with products? Add some sample items with related images in one click.</p>
+              </div>
+            </div>
+            <button
+              className={`btn btn-primary ${isSeeding ? 'loading' : ''}`}
+              onClick={handleSeed}
+              disabled={isSeeding}
+            >
+              {isSeeding ? 'Adding...' : 'Add Sample Products'}
+              {!isSeeding && <Plus size={18} />}
+            </button>
+          </div>
+        )}
+
         {/* Premium Dashboard Header */}
         <div className="dashboard-header">
           <div className="header-info">
@@ -23,9 +87,11 @@ export default function DashboardPage() {
             <p className="dashboard-subtitle">Track your growth and optimize with AI-driven insights.</p>
           </div>
           <div className="dashboard-controls glass">
+            <button className="btn btn-primary btn-sm mr-2" onClick={() => navigate('/add-product')}>
+              <Plus size={16} /> List New Product
+            </button>
             <button className="control-btn active">7D</button>
             <button className="control-btn">30D</button>
-            <button className="control-btn">1Y</button>
           </div>
         </div>
 
@@ -129,8 +195,8 @@ export default function DashboardPage() {
               {weeklyViewsData.map((day, i) => (
                 <div key={i} className="chart-column">
                   <div className="column-bar-wrapper">
-                    <div 
-                      className="column-bar" 
+                    <div
+                      className="column-bar"
                       style={{ height: `${(day.views / maxViews) * 100}%` }}
                     >
                       <div className="bar-tooltip">{day.views}</div>
@@ -153,12 +219,17 @@ export default function DashboardPage() {
             <div className="ai-assistant-body">
               <p className="ai-prompt-text">Describe what you want to sell, and AI will create the premium listing for you.</p>
               <div className="ai-input-group">
-                <textarea 
-                  className="ai-glow-input" 
+                <textarea
+                  className="ai-glow-input"
                   placeholder="e.g. A handmade wooden coffee table, walnut finish, mid-century modern style..."
                   rows="3"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
                 ></textarea>
-                <button className="btn btn-primary btn-lg btn-full ai-generate-btn">
+                <button
+                  className="btn btn-primary btn-lg btn-full ai-generate-btn"
+                  onClick={() => navigate(`/add-product?prompt=${encodeURIComponent(aiPrompt)}`)}
+                >
                   Generate Listing <Sparkles size={18} />
                 </button>
               </div>
@@ -185,25 +256,29 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {products.slice(0, 5).map((product, i) => (
+                {(products.length > 0 ? products : mockProducts.filter(p => p.sellerId === 1)).slice(0, 5).map((product, i) => (
                   <tr key={i}>
                     <td><span className="rank-badge">#{i + 1}</span></td>
                     <td>
                       <div className="table-product">
                         <div className="product-thumb">
-                          {product.category.charAt(0)}
+                          {product.image ? (
+                            <img src={product.image} alt="" className="thumb-img" />
+                          ) : (
+                            (product.category_name || product.category || 'P').charAt(0)
+                          )}
                         </div>
                         <div className="product-meta">
                           <span className="name">{product.title}</span>
-                          <span className="category">{product.category}</span>
+                          <span className="category">{product.category_name || product.category || product.category || 'Product'}</span>
                         </div>
                       </div>
                     </td>
-                    <td>{product.views.toLocaleString()}</td>
+                    <td>{(product.views || 0).toLocaleString()}</td>
                     <td>
                       <div className="engagement-metric">
                         <div className="metric-dot"></div>
-                        <span>{product.likes} likes</span>
+                        <span>{product.likes || 0} likes</span>
                       </div>
                     </td>
                     <td>{Math.floor(Math.random() * 10 + 2)}%</td>

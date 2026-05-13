@@ -5,6 +5,7 @@ import {
   Phone, MessageSquare, Star, Clock, Navigation
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import noidaMap from '../assets/noida_map.png';
 import './OrderTrackingPage.css';
 
 const MOCK_ORDER = {
@@ -86,9 +87,9 @@ export default function OrderTrackingPage() {
                   <p>Connecting to GPS satellite...</p>
                 </div>
               ) : (
-                <div className="map-placeholder">
-                  {/* Real Map Component goes here. Simulated for now */}
-                  <div className="map-bg pattern-dots"></div>
+                <div className="map-real-view">
+                  <img src={noidaMap} alt="Live Map" className="map-img-real" />
+                  <div className="map-overlay-glow"></div>
                   
                   {/* Destination Pin */}
                   <motion.div 

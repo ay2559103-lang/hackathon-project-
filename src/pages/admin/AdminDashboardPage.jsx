@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { 
   TrendingUp, Users, ShoppingBag, DollarSign, 
   ArrowUpRight, ArrowDownRight, Download, Activity,
-  Package, MapPin
+  Package, MapPin, BarChart
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import './AdminDashboardPage.css';

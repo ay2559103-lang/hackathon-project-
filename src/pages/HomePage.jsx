@@ -1,12 +1,13 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   MapPin, Sparkles, ShoppingBag, MessageCircle, Star,
   BarChart3, ArrowRight, ChevronRight, Zap, Shield,
   Users, TrendingUp, Store, Plus, Globe, Smartphone,
-  Heart, CheckCircle, Clock, LayoutGrid
+  Heart, CheckCircle, Clock, LayoutGrid, Info
 } from 'lucide-react';
 import heroPremium from '../assets/hero_premium.png';
 import { categories, products, sellers } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 import './HomePage.css';
 
 const stats = [
@@ -57,6 +58,10 @@ const featuredCategories = [
 ];
 
 export default function HomePage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isSeller = user?.user_metadata?.role === 'seller';
+
   return (
     <div className="home-page">
       {/* Full-Width Premium Hero Section */}
@@ -84,12 +89,16 @@ export default function HomePage() {
               <NavLink to="/products" className="btn btn-primary btn-lg">
                 Explore Products <ShoppingBag size={20} />
               </NavLink>
-              <NavLink to="/add-product" className="btn btn-outline btn-lg">
-                Sell Your Product <Plus size={20} />
-              </NavLink>
-              <NavLink to="/login" className="btn btn-ghost btn-lg ml-4">
-                Login <ArrowRight size={20} />
-              </NavLink>
+              
+              {user?.user_metadata?.role === 'seller' ? (
+                <NavLink to="/add-product" className="btn btn-outline btn-lg ml-4">
+                  Sell Now <Plus size={20} />
+                </NavLink>
+              ) : !user && (
+                <NavLink to="/login" className="btn btn-ghost btn-lg ml-4">
+                  Login <ArrowRight size={20} />
+                </NavLink>
+              )}
             </div>
 
             
@@ -157,24 +166,26 @@ export default function HomePage() {
       </section>
 
       {/* Featured Categories */}
-      <section className="categories-section">
-        <div className="container">
-          <div className="section-header text-center">
-            <h2 className="section-title">Shop by <span className="gradient-text">Category</span></h2>
-            <p className="section-subtitle">Find exactly what you need in your neighborhood.</p>
+      {!isSeller && (
+        <section className="categories-section">
+          <div className="container">
+            <div className="section-header text-center">
+              <h2 className="section-title">Shop by <span className="gradient-text">Category</span></h2>
+              <p className="section-subtitle">Find exactly what you need in your neighborhood.</p>
+            </div>
+            
+            <div className="categories-grid stagger">
+              {featuredCategories.map((cat, i) => (
+                <NavLink key={i} to="/products" className="category-card glass-card">
+                  <div className="category-icon">{cat.icon}</div>
+                  <span className="category-name">{cat.name}</span>
+                  <ChevronRight size={16} className="category-arrow" />
+                </NavLink>
+              ))}
+            </div>
           </div>
-          
-          <div className="categories-grid stagger">
-            {featuredCategories.map((cat, i) => (
-              <NavLink key={i} to="/feed" className="category-card glass-card">
-                <div className="category-icon">{cat.icon}</div>
-                <span className="category-name">{cat.name}</span>
-                <ChevronRight size={16} className="category-arrow" />
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Featured Products Section */}
       <section className="products-section">
@@ -184,7 +195,7 @@ export default function HomePage() {
               <h2 className="section-title">Featured <span className="gradient-text">Listings</span></h2>
               <p className="section-subtitle">Premium picks from our top-rated local sellers.</p>
             </div>
-            <NavLink to="/feed" className="btn btn-ghost">
+            <NavLink to="/products" className="btn btn-ghost">
               View All <ArrowRight size={18} />
             </NavLink>
           </div>
@@ -227,10 +238,15 @@ export default function HomePage() {
                       <span>{product.distance}</span>
                     </div>
                     <div className="product-btn-group">
-                      <NavLink to="/chat" className="btn-chat-icon" title="Chat with seller">
-                        <MessageCircle size={18} />
+                      <NavLink to={`/product/${product.id}`} className="btn-chat-icon" title="View Details">
+                        <Info size={18} />
                       </NavLink>
-                      <button className="btn-buy-now">Details</button>
+                      <button 
+                        className="btn-buy-now" 
+                        onClick={() => navigate('/checkout', { state: { product: { ...product, quantity: 1 } } })}
+                      >
+                        Buy Now
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -304,9 +320,16 @@ export default function HomePage() {
                 your home or start a professional local business, we've got the tools you need.
               </p>
               <div className="cta-buttons-premium">
-                <NavLink to="/add-product" className="btn btn-primary btn-xl">
-                  Start Selling Now <Plus size={22} />
-                </NavLink>
+                {user?.user_metadata?.role === 'seller' ? (
+                  <NavLink to="/add-product" className="btn btn-primary btn-xl">
+                    Start Selling Now <Plus size={22} />
+                  </NavLink>
+                ) : !user && (
+                  <NavLink to="/login" className="btn btn-primary btn-xl">
+                    Create Seller Account <ArrowRight size={22} />
+                  </NavLink>
+                )}
+                
                 <NavLink to="/ai-assistant" className="btn btn-outline btn-xl">
                   Chat with AI Assistant <Sparkles size={22} />
                 </NavLink>
